@@ -89,7 +89,7 @@ As in Project 5 the web server will return JSON encoded model data in response t
 
 To help you make sure your web server conforms to the proper API we provide a test suite in the sub-directory `test`. **Please make sure that all of the tests in the suite pass before submitting.** See the Testing section below for details.
 
-Your GET requests do not return exactly the same thing that the `models` functions return but they do need to return the information needed by your app so that the model data of each view can be displayed with a single `FetchModel` call. You will need to do subsetting and/or augmentation of the objects coming from the database to build your response to meet the needs of the UI. For this assignment you are not allow to alter the database schema in anyway.
+Your GET requests do not return exactly the same thing that the `models` functions return but they do need to return the information needed by your app so that the model data of each view can be displayed with a single `FetchModel` call. You will need to do subsetting and/or augmentation of the objects coming from the database to build your response to meet the needs of the UI. For this assignment you are not allowed to alter the database schema in anyway.
 
 **\*IMPORTANT!\***    
 
@@ -111,7 +111,7 @@ In particular, any time you call `FetchModel` in `photoShare.jsx` or your other 
 
 Here are some hints for making the switch to `axios`:
 
-- In any components fetching data using `axio`s, be sure to import it as follows:
+- In any components fetching data using `axios`, be sure to import it as follows:
 
 ```javascript
 import axios from 'axios';

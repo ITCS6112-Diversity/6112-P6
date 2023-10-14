@@ -1,0 +1,9 @@
+.MuiGrid-grid-sm-3 {
+  box-shadow: 2px 0px 15px 0px rgba(128, 123, 123, 1);
+}
+
+.user-list-item a {
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  color: rgba(0, 0, 0, 0.87);
+  text-decoration: none;
+}
