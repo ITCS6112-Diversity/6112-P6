@@ -52,11 +52,9 @@ class UserPhotos extends React.Component {
                       Created at: <i>{photo.date_time}</i>
                     </Typography>
                     <Divider/>
-                    {console.log(photo.comments)}
                     {
-                      (photo.comments.length != 0) ? photo.comments.map((comment) => (
+                      (photo.comments.length !== 0) ? photo.comments.map((comment) => (
                         <div key={comment._id}>
-                          {console.log(comment)}
                           <Typography className="photos-comment-link" gutterBottom variant="body2" component="div">
                             <Link to={"/users/" + comment.user._id}>
                               <b>{comment.user.first_name + " " + comment.user.last_name}</b>

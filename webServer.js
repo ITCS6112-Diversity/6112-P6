@@ -46,7 +46,6 @@ const SchemaInfo = require("./schema/schemaInfo.js");
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
-const models = require("./modelData/photoApp.js").models;
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1/project6", {
   useNewUrlParser: true,
@@ -143,7 +142,8 @@ app.get("/test/:p1", function (request, response) {
  * URL /user/list - Returns all the User objects.
  */
 app.get("/user/list", function (request, response) {
-  // response.status(200).send(models.userListModel());
+
+  // Get all users
   User.find({}, function (err, users) {
     if (err) {
       console.error("Error in /user/list:", err);
@@ -165,7 +165,6 @@ app.get("/user/list", function (request, response) {
       };
       userList.push(userListItem);
     });
-    // console.log("UsersList", userList);
     response.end(JSON.stringify(userList));
   });
 });
@@ -175,13 +174,8 @@ app.get("/user/list", function (request, response) {
  */
 app.get("/user/:id", function (request, response) {
   const id = request.params.id;
-  // const user = models.userModel(id);
-  // if (user === null) {
-  //   console.log("User with _id:" + id + " not found.");
-  //   response.status(400).send("Not found");
-  //   return;
-  // }
-  // response.status(200).send(user);
+
+  // Get user by id
   User.findById(id, function (err, user) {
     if (err) {
       console.error("Error in /user/:id", err);
@@ -195,69 +189,21 @@ app.get("/user/:id", function (request, response) {
 
     // Convert mongoose object to JSON object and return
     user = JSON.parse(JSON.stringify(user));
-    // console.log("User Id", user);
     response.end(JSON.stringify(user));
   });
 });
-
-async function getUser(id) {
-  // let user = null;
-  // User.findById(id, function (err, userItem) {
-  //   if (err) {
-  //     console.error("Error in /user/:id", err);
-  //     return;
-  //   }
-  //   if (userItem === null) {
-  //     return;
-  //   }
-
-  //   // Convert mongoose object to JSON object and return
-    
-  //   user = JSON.parse(JSON.stringify(userItem));
-    
-    
-  //   // console.log("User Id", user);
-  // });
-  // console.log(user);
-  // return user;
-  const user = User.findById(id).exec();
-  console.log(JSON.parse(JSON.stringify(user)));
-  return JSON.parse(JSON.stringify(user));
-}
-
-function convertComments(comments) {
-  const commentList = [];
-  comments.forEach((comment) => {
-    var commentListItem = {
-      _id: comment._id.toString(),
-      comment: comment.comment,
-      date_time: comment.date_time,
-      user: getUser(comment.user_id.toString()),
-    };
-    commentList.push((commentListItem));
-  });
-  return commentList;
-}
 
 /**
  * URL /photosOfUser/:id - Returns the Photos for User (id).
  */
 app.get("/photosOfUser/:id", function (request, response) {
   const id = request.params.id;
-  // const photos = models.photoOfUserModel(id);
-  // if (photos.length === 0) {
-  //   console.log("Photos for user with _id:" + id + " not found.");
-  //   response.status(400).send("Not found");
-  //   return;
-  // }
-  // response.status(200).send(photos);
 
-  Photo.find({
-    user_id: new mongoose.Types.ObjectId(id),
-  }, function (err, photos) {
-    if (err) {
-      console.error("Error in /photosOfUser/:id", err);
-      response.status(500).send(JSON.stringify(err));
+  // Get photos of user
+  Photo.find({user_id: new mongoose.Types.ObjectId(id)}, function (errPhoto, photos) {
+    if (errPhoto) {
+      console.error("Error in /photosOfUser/:id", errPhoto);
+      response.status(500).send(JSON.stringify(errPhoto));
       return;
     }
     if (photos.length === 0) {
@@ -265,43 +211,64 @@ app.get("/photosOfUser/:id", function (request, response) {
       return;
     }
 
-   
-    const photoList = [];
+    // Get list of user ids from comments to retrieve user info
+    const user_comment_ids = [];
     photos.forEach((photo) => {
-      var photoListItem = {
-        _id: photo._id.toString(),
-        file_name: photo.file_name,
-        date_time: photo.date_time,
-        user_id: photo.user_id.toString(),
-        comments: convertComments(photo.comments),
-      };
-      photoList.push(photoListItem);
+      photo.comments.forEach((comment) => {
+        user_comment_ids.push(mongoose.Types.ObjectId(comment.user_id.toString()));
+      });
     });
-    console.log("Photos", JSON.stringify(photoList));
-    response.end(JSON.stringify(photoList));
 
-    
-    // async.each(
-    //   collections,
-    //   function (col, done_callback) {
-    //     col.collection.countDocuments({}, function (err, count) {
-    //       col.count = count;
-    //       done_callback(err);
-    //     });
-    //   },
-    //   function (err) {
-    //     if (err) {
-    //       response.status(500).send(JSON.stringify(err));
-    //     } else {
-    //       const obj = {};
-    //       for (let i = 0; i < collections.length; i++) {
-    //         obj[collections[i].name] = collections[i].count;
-    //       }
-    //       response.end(JSON.stringify(obj));
-    //     }
-    //   }
-    // );
+    // Get user info for each comment user id
+    User.find({_id: {$in: user_comment_ids}}, function (errUsers, users) {
+      if (errUsers) {
+        console.error("Error in /photosOfUser/:id", errUsers);
+        response.status(500).send(JSON.stringify(errUsers));
+        return;
+      }
+      if (users.length === 0) {
+        response.status(400).send("Users of comments not found");
+        return;
+      }
 
+      // Limit comment user info to id, first_name, and last_name
+      users = users.map((user) => {
+        return {
+          _id: user._id.toString(),
+          first_name: user.first_name,
+          last_name: user.last_name,
+        };
+      });
+
+      // Convert photos to JSON objects with necessary properties
+      const photoList = [];
+      photos.forEach((photo) => {
+        var photoListItem = {
+          _id: photo._id.toString(),
+          file_name: photo.file_name,
+          date_time: new Date(photo.date_time).toUTCString(),
+          user_id: photo.user_id.toString(),
+          // Convert comments to JSON objects with necessary properties
+          comments: (() => {
+            const commentList = [];
+            photo.comments.forEach((comment) => {
+              var commentListItem = {
+                _id: comment._id.toString(),
+                comment: comment.comment,
+                date_time: new Date(comment.date_time).toUTCString(),
+                // Get user object that matches comment user id
+                user: users.find((u) => u._id.toString() === comment.user_id.toString()),
+              };
+              commentList.push((commentListItem));
+            });
+            return commentList;
+          })()
+        };
+        photoList.push(photoListItem);
+      });
+      console.log("Photos", JSON.stringify(photoList));
+      response.end(JSON.stringify(photoList));
+    });
   });
 });
 
