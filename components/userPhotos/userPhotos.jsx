@@ -37,6 +37,7 @@ class UserPhotos extends React.Component {
     return (
       <div>
         <Grid container spacing={6}>
+          
           {this.state.photos && (
             this.state.photos.map((photo) => (
               <Grid item md={3} key={photo._id}>
@@ -51,9 +52,11 @@ class UserPhotos extends React.Component {
                       Created at: <i>{photo.date_time}</i>
                     </Typography>
                     <Divider/>
+                    {console.log(photo.comments)}
                     {
-                      photo.comments === undefined ? null : photo.comments.map((comment) => (
+                      (photo.comments.length != 0) ? photo.comments.map((comment) => (
                         <div key={comment._id}>
+                          {console.log(comment)}
                           <Typography className="photos-comment-link" gutterBottom variant="body2" component="div">
                             <Link to={"/users/" + comment.user._id}>
                               <b>{comment.user.first_name + " " + comment.user.last_name}</b>
@@ -65,7 +68,7 @@ class UserPhotos extends React.Component {
                           </Typography>
                           <Divider/>
                         </div>
-                      ))
+                      )) : null
                     }
                   </CardContent>
                 </Card>

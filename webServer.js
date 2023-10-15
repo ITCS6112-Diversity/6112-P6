@@ -200,6 +200,31 @@ app.get("/user/:id", function (request, response) {
   });
 });
 
+async function getUser(id) {
+  // let user = null;
+  // User.findById(id, function (err, userItem) {
+  //   if (err) {
+  //     console.error("Error in /user/:id", err);
+  //     return;
+  //   }
+  //   if (userItem === null) {
+  //     return;
+  //   }
+
+  //   // Convert mongoose object to JSON object and return
+    
+  //   user = JSON.parse(JSON.stringify(userItem));
+    
+    
+  //   // console.log("User Id", user);
+  // });
+  // console.log(user);
+  // return user;
+  const user = User.findById(id).exec();
+  console.log(JSON.parse(JSON.stringify(user)));
+  return JSON.parse(JSON.stringify(user));
+}
+
 function convertComments(comments) {
   const commentList = [];
   comments.forEach((comment) => {
@@ -207,7 +232,7 @@ function convertComments(comments) {
       _id: comment._id.toString(),
       comment: comment.comment,
       date_time: comment.date_time,
-      user_id: comment.user_id.toString(),
+      user: getUser(comment.user_id.toString()),
     };
     commentList.push((commentListItem));
   });
@@ -252,8 +277,10 @@ app.get("/photosOfUser/:id", function (request, response) {
       };
       photoList.push(photoListItem);
     });
-    console.log("Photos", photoList);
+    console.log("Photos", JSON.stringify(photoList));
     response.end(JSON.stringify(photoList));
+
+    
     // async.each(
     //   collections,
     //   function (col, done_callback) {
@@ -274,6 +301,7 @@ app.get("/photosOfUser/:id", function (request, response) {
     //     }
     //   }
     // );
+
   });
 });
 
