@@ -143,7 +143,31 @@ app.get("/test/:p1", function (request, response) {
  * URL /user/list - Returns all the User objects.
  */
 app.get("/user/list", function (request, response) {
-  response.status(200).send(models.userListModel());
+  // response.status(200).send(models.userListModel());
+  User.find({}, function (err, users) {
+    if (err) {
+      console.error("Error in /user/list:", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    if (users.length === 0) {
+      response.status(500).send("Missing Users Info");
+      return;
+    }
+
+    // Convert user objects to objects with only id, first_name, and last_name
+    const userList = [];
+    users.forEach((user) => {
+      var userListItem = {
+        _id: user._id.toString(),
+        first_name: user.first_name,
+        last_name: user.last_name,
+      };
+      userList.push(userListItem);
+    });
+    // console.log("UsersList", userList);
+    response.end(JSON.stringify(userList));
+  });
 });
 
 /**
@@ -151,28 +175,109 @@ app.get("/user/list", function (request, response) {
  */
 app.get("/user/:id", function (request, response) {
   const id = request.params.id;
-  const user = models.userModel(id);
-  if (user === null) {
-    console.log("User with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
-  }
-  response.status(200).send(user);
+  // const user = models.userModel(id);
+  // if (user === null) {
+  //   console.log("User with _id:" + id + " not found.");
+  //   response.status(400).send("Not found");
+  //   return;
+  // }
+  // response.status(200).send(user);
+  User.findById(id, function (err, user) {
+    if (err) {
+      console.error("Error in /user/:id", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    if (user === null) {
+      response.status(400).send("User not found");
+      return;
+    }
+
+    // Convert mongoose object to JSON object and return
+    user = JSON.parse(JSON.stringify(user));
+    // console.log("User Id", user);
+    response.end(JSON.stringify(user));
+  });
 });
+
+function convertComments(comments) {
+  const commentList = [];
+  comments.forEach((comment) => {
+    var commentListItem = {
+      _id: comment._id.toString(),
+      comment: comment.comment,
+      date_time: comment.date_time,
+      user_id: comment.user_id.toString(),
+    };
+    commentList.push((commentListItem));
+  });
+  return commentList;
+}
 
 /**
  * URL /photosOfUser/:id - Returns the Photos for User (id).
  */
 app.get("/photosOfUser/:id", function (request, response) {
   const id = request.params.id;
-  const photos = models.photoOfUserModel(id);
-  if (photos.length === 0) {
-    console.log("Photos for user with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
-  }
-  response.status(200).send(photos);
+  // const photos = models.photoOfUserModel(id);
+  // if (photos.length === 0) {
+  //   console.log("Photos for user with _id:" + id + " not found.");
+  //   response.status(400).send("Not found");
+  //   return;
+  // }
+  // response.status(200).send(photos);
+
+  Photo.find({
+    user_id: new mongoose.Types.ObjectId(id),
+  }, function (err, photos) {
+    if (err) {
+      console.error("Error in /photosOfUser/:id", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    if (photos.length === 0) {
+      response.status(400).send("Photos not found");
+      return;
+    }
+
+   
+    const photoList = [];
+    photos.forEach((photo) => {
+      var photoListItem = {
+        _id: photo._id.toString(),
+        file_name: photo.file_name,
+        date_time: photo.date_time,
+        user_id: photo.user_id.toString(),
+        comments: convertComments(photo.comments),
+      };
+      photoList.push(photoListItem);
+    });
+    console.log("Photos", photoList);
+    response.end(JSON.stringify(photoList));
+    // async.each(
+    //   collections,
+    //   function (col, done_callback) {
+    //     col.collection.countDocuments({}, function (err, count) {
+    //       col.count = count;
+    //       done_callback(err);
+    //     });
+    //   },
+    //   function (err) {
+    //     if (err) {
+    //       response.status(500).send(JSON.stringify(err));
+    //     } else {
+    //       const obj = {};
+    //       for (let i = 0; i < collections.length; i++) {
+    //         obj[collections[i].name] = collections[i].count;
+    //       }
+    //       response.end(JSON.stringify(obj));
+    //     }
+    //   }
+    // );
+  });
 });
+
+
 
 const server = app.listen(3000, function () {
   const port = server.address().port;
