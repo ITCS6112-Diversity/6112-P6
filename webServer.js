@@ -147,11 +147,11 @@ app.get("/user/list", function (request, response) {
   User.find({}, function (err, users) {
     if (err) {
       console.error("Error in /user/list:", err);
-      response.status(500).send(JSON.stringify(err));
+      response.status(400).send(JSON.stringify(err));
       return;
     }
     if (users.length === 0) {
-      response.status(500).send("Missing Users Info");
+      response.status(400).send("Missing Users Info");
       return;
     }
 
@@ -179,7 +179,7 @@ app.get("/user/:id", function (request, response) {
   User.findById(id, function (err, user) {
     if (err) {
       console.error("Error in /user/:id", err);
-      response.status(500).send(JSON.stringify(err));
+      response.status(400).send(JSON.stringify(err));
       return;
     }
     if (user === null) {
@@ -187,8 +187,17 @@ app.get("/user/:id", function (request, response) {
       return;
     }
 
+    user = {
+      _id: user._id.toString(),
+      first_name: user.first_name,
+      last_name: user.last_name,
+      location: user.location,
+      description: user.description,
+      occupation: user.occupation,
+    };
+
     // Convert mongoose object to JSON object and return
-    user = JSON.parse(JSON.stringify(user));
+    // user = JSON.parse(JSON.stringify(user));
     response.end(JSON.stringify(user));
   });
 });
@@ -199,14 +208,19 @@ app.get("/user/:id", function (request, response) {
 app.get("/photosOfUser/:id", function (request, response) {
   const id = request.params.id;
 
+  // Check if id is valid before attempting to convert id to ObjectId for query
+  if (mongoose.Types.ObjectId.isValid(id) === false) {
+    response.status(400).send("Invalid id");
+    return;
+  }
   // Get photos of user
   Photo.find({user_id: new mongoose.Types.ObjectId(id)}, function (errPhoto, photos) {
     if (errPhoto) {
       console.error("Error in /photosOfUser/:id", errPhoto);
-      response.status(500).send(JSON.stringify(errPhoto));
+      response.status(400).send(JSON.stringify(errPhoto));
       return;
     }
-    if (photos.length === 0) {
+    if (photos === null || photos.length === 0) {
       response.status(400).send("Photos not found");
       return;
     }
@@ -223,10 +237,10 @@ app.get("/photosOfUser/:id", function (request, response) {
     User.find({_id: {$in: user_comment_ids}}, function (errUsers, users) {
       if (errUsers) {
         console.error("Error in /photosOfUser/:id", errUsers);
-        response.status(500).send(JSON.stringify(errUsers));
+        response.status(400).send(JSON.stringify(errUsers));
         return;
       }
-      if (users.length === 0) {
+      if (users === null || users.length === 0) {
         response.status(400).send("Users of comments not found");
         return;
       }
