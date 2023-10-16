@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import './userPhotos.css';
 import { Link } from 'react-router-dom';
-import fetchModel from '../../lib/fetchModelData';
+import axios from 'axios';
 
 
 /**
@@ -28,7 +28,7 @@ class UserPhotos extends React.Component {
   }
 
   getPhotoData() {
-    fetchModel("http://localhost:3000/photosOfUser/" + this.props.match.params.userId).then((response) => {
+    axios.get("http://localhost:3000/photosOfUser/" + this.props.match.params.userId).then((response) => {
       this.setState({ photos: response.data });
     });
   }

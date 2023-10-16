@@ -8,7 +8,7 @@ import { Container } from '@mui/system';
 import { styled } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import './userDetail.css';
-import fetchModel from '../../lib/fetchModelData';
+import axios from 'axios';
 
 /**
  * Define UserDetail, a React component of project #5
@@ -32,7 +32,7 @@ class UserDetail extends React.Component {
   }
 
   getUserData() {
-    fetchModel("http://localhost:3000/user/" + this.props.match.params.userId).then((response) => {
+    axios.get("http://localhost:3000/user/" + this.props.match.params.userId).then((response) => {
       this.setState({ user: response.data });
     });
   }

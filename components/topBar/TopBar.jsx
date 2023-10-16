@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import './TopBar.css';
 import { withRouter } from "react-router";
-import fetchModel from '../../lib/fetchModelData';
+import axios from 'axios';
 
 /**
  * Define TopBar, a React component of project #5
@@ -32,13 +32,13 @@ class TopBar extends React.Component {
   }
 
   getUserData() {
-    fetchModel("http://localhost:3000/user/" + this.props.location.pathname.split("/")[2]).then((response) => {
+    axios.get("http://localhost:3000/user/" + this.props.location.pathname.split("/")[2]).then((response) => {
       this.setState({ user: response.data });
     });
   }
 
   getVersionData(){
-    fetchModel("http://localhost:3000/test/info").then((response) => {
+    axios.get("http://localhost:3000/test/info").then((response) => {
       this.setState({ version: response.data });
     });
   }

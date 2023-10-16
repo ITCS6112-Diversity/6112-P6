@@ -75,7 +75,6 @@ app.get("/", function (request, response) {
 app.get("/test/:p1", function (request, response) {
   // Express parses the ":p1" from the URL and returns it in the request.params
   // objects.
-  console.log("/test called with param1 = ", request.params.p1);
 
   const param = request.params.p1 || "info";
 
@@ -98,7 +97,6 @@ app.get("/test/:p1", function (request, response) {
       }
 
       // We got the object - return it in JSON format.
-      console.log("SchemaInfo", info[0]);
       response.end(JSON.stringify(info[0]));
     });
   } else if (param === "counts") {
@@ -280,7 +278,6 @@ app.get("/photosOfUser/:id", function (request, response) {
         };
         photoList.push(photoListItem);
       });
-      console.log("Photos", JSON.stringify(photoList));
       response.end(JSON.stringify(photoList));
     });
   });
