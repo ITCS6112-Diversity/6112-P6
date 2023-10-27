@@ -288,9 +288,10 @@ app.get("/photosOfUser/:id", function (request, response) {
 const server = app.listen(3000, function () {
   const port = server.address().port;
   console.log(
-    "Listening at http://localhost:" +
+    "Listening at address http://localhost:" +
       port +
       " exporting the directory " +
       __dirname
   );
 });
+
