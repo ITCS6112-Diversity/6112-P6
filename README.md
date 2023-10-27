@@ -150,3 +150,14 @@ In addition, your code and templates must be clean and readable. Remember to run
 Use the standard class [submission mechanism](https://github.com/btdobbs/WA/tree/main/Project/00) to submit `project6`. Make sure your code is free of any lint warnings and passes the provided test suite.
 
 [^1]: [Stanford Computer Science](https://cs.stanford.edu)
+
+# Scrum Team
+## Product Owner:
+Anas Ibrahim
+## Scrum Master:
+Patrick Flynn
+## Developers
+- Ryan Bass
+- Ashutosh Zawar
+- Saakshi Patel
+- Shubh Almal
